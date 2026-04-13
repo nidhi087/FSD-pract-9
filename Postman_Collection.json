@@ -9,6 +9,23 @@
             "item": [
                 {
                     "name": "Register User",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 201', function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "pm.test('Response has success message', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    pm.expect(json.message).to.eql('User registered successfully');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "request": {
                         "method": "POST",
                         "header": [
@@ -24,20 +41,170 @@
                         "url": {
                             "raw": "http://localhost:5000/api/auth/register",
                             "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
+                            "host": ["localhost"],
                             "port": "5000",
-                            "path": [
-                                "api",
-                                "auth",
-                                "register"
-                            ]
+                            "path": ["api", "auth", "register"]
+                        }
+                    }
+                },
+                {
+                    "name": "Register - Validation Error (Missing Name)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 400', function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "});",
+                                    "pm.test('Returns validation errors array', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    pm.expect(json.errors).to.be.an('array');",
+                                    "    pm.expect(json.errors.length).to.be.greaterThan(0);",
+                                    "});",
+                                    "pm.test('Error mentions name is required', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    var msgs = json.errors.map(e => e.msg);",
+                                    "    pm.expect(msgs).to.include('Name is required');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"noname@example.com\",\n  \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:5000/api/auth/register",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "5000",
+                            "path": ["api", "auth", "register"]
+                        }
+                    }
+                },
+                {
+                    "name": "Register - Validation Error (Invalid Email)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 400', function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "});",
+                                    "pm.test('Error mentions invalid email', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    var msgs = json.errors.map(e => e.msg);",
+                                    "    pm.expect(msgs).to.include('Please include a valid email');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Bad Email User\",\n  \"email\": \"not-an-email\",\n  \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:5000/api/auth/register",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "5000",
+                            "path": ["api", "auth", "register"]
+                        }
+                    }
+                },
+                {
+                    "name": "Register - Validation Error (Short Password)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 400', function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "});",
+                                    "pm.test('Error mentions password length', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    var msgs = json.errors.map(e => e.msg);",
+                                    "    pm.expect(msgs).to.include('Please enter a password with 6 or more characters');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Short Pass\",\n  \"email\": \"shortpass@example.com\",\n  \"password\": \"123\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:5000/api/auth/register",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "5000",
+                            "path": ["api", "auth", "register"]
                         }
                     }
                 },
                 {
                     "name": "Login User",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "pm.test('Response contains token', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    pm.expect(json.token).to.be.a('string');",
+                                    "});",
+                                    "pm.test('Response contains user info', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    pm.expect(json.user).to.have.property('id');",
+                                    "    pm.expect(json.user).to.have.property('name');",
+                                    "    pm.expect(json.user).to.have.property('email');",
+                                    "});",
+                                    "var json = pm.response.json();",
+                                    "if (json.token) {",
+                                    "    pm.collectionVariables.set('token', json.token);",
+                                    "    console.log('Token saved:', json.token);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "request": {
                         "method": "POST",
                         "header": [
@@ -53,25 +220,376 @@
                         "url": {
                             "raw": "http://localhost:5000/api/auth/login",
                             "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
+                            "host": ["localhost"],
                             "port": "5000",
-                            "path": [
-                                "api",
-                                "auth",
-                                "login"
-                            ]
+                            "path": ["api", "auth", "login"]
+                        }
+                    }
+                },
+                {
+                    "name": "Login - Validation Error (Invalid Email)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 400', function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "});",
+                                    "pm.test('Returns validation errors', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    pm.expect(json.errors).to.be.an('array');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"invalid-email\",\n  \"password\": \"password123\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:5000/api/auth/login",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "5000",
+                            "path": ["api", "auth", "login"]
+                        }
+                    }
+                },
+                {
+                    "name": "Login - Wrong Password",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 400', function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "});",
+                                    "pm.test('Returns invalid credentials message', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    pm.expect(json.message).to.eql('Invalid credentials');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"wrongpassword\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:5000/api/auth/login",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "5000",
+                            "path": ["api", "auth", "login"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Profile (Protected)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "pm.test('Response has user data without password', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    pm.expect(json).to.have.property('name');",
+                                    "    pm.expect(json).to.have.property('email');",
+                                    "    pm.expect(json).to.not.have.property('password');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:5000/api/auth/profile",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "5000",
+                            "path": ["api", "auth", "profile"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Profile - Unauthorized (No Token)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 401', function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});",
+                                    "pm.test('Returns authorization denied message', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    pm.expect(json.message).to.eql('No token, authorization denied');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:5000/api/auth/profile",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "5000",
+                            "path": ["api", "auth", "profile"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Profile - Invalid Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 401', function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});",
+                                    "pm.test('Returns token invalid message', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    pm.expect(json.message).to.eql('Token is not valid');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer invalidtoken123"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:5000/api/auth/profile",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "5000",
+                            "path": ["api", "auth", "profile"]
                         }
                     }
                 }
             ]
         },
         {
-            "name": "2. Image Upload",
+            "name": "2. Products",
+            "item": [
+                {
+                    "name": "Get All Products",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "pm.test('Response is an array', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    pm.expect(json).to.be.an('array');",
+                                    "});",
+                                    "pm.test('Products have required fields', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    if (json.length > 0) {",
+                                    "        pm.expect(json[0]).to.have.property('title');",
+                                    "        pm.expect(json[0]).to.have.property('price');",
+                                    "        pm.expect(json[0]).to.have.property('image');",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:5000/api/products",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "5000",
+                            "path": ["api", "products"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Single Product",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "pm.test('Product has required fields', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    pm.expect(json).to.have.property('title');",
+                                    "    pm.expect(json).to.have.property('price');",
+                                    "    pm.expect(json).to.have.property('image');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:5000/api/products/1",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "5000",
+                            "path": ["api", "products", "1"]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Product - Not Found",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 404', function () {",
+                                    "    pm.response.to.have.status(404);",
+                                    "});",
+                                    "pm.test('Returns not found message', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    pm.expect(json.message).to.eql('Product not found');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:5000/api/products/9999",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "5000",
+                            "path": ["api", "products", "9999"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "3. Image Upload",
             "item": [
                 {
                     "name": "Upload Product Image",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "pm.test('Response has imageUrl', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    pm.expect(json.success).to.eql(true);",
+                                    "    pm.expect(json).to.have.property('imageUrl');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "image",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "http://localhost:5000/api/upload",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "5000",
+                            "path": ["api", "upload"]
+                        }
+                    }
+                },
+                {
+                    "name": "Upload - Unauthorized (No Token)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 401', function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});",
+                                    "pm.test('Returns authorization denied', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    pm.expect(json.message).to.eql('No token, authorization denied');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "request": {
                         "method": "POST",
                         "header": [],
@@ -88,24 +606,176 @@
                         "url": {
                             "raw": "http://localhost:5000/api/upload",
                             "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
+                            "host": ["localhost"],
                             "port": "5000",
-                            "path": [
-                                "api",
-                                "upload"
-                            ]
+                            "path": ["api", "upload"]
                         }
                     }
                 }
             ]
         },
         {
-            "name": "3. Payment Mockup",
+            "name": "4. Payment Mockup",
             "item": [
                 {
-                    "name": "Process Payment",
+                    "name": "Process Payment - Credit Card",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "pm.test('Response has transaction details', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    pm.expect(json).to.have.property('amount');",
+                                    "    pm.expect(json).to.have.property('paymentMethod');",
+                                    "    pm.expect(json.paymentMethod).to.eql('credit_card');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"amount\": 500,\n  \"paymentMethod\": \"credit_card\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:5000/api/payment/process",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "5000",
+                            "path": ["api", "payment", "process"]
+                        }
+                    }
+                },
+                {
+                    "name": "Process Payment - Cash on Delivery",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "pm.test('COD payment always succeeds', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    pm.expect(json.success).to.eql(true);",
+                                    "    pm.expect(json.paymentMethod).to.eql('cash_on_delivery');",
+                                    "});",
+                                    "pm.test('Response has transaction ID', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    pm.expect(json).to.have.property('transactionId');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"amount\": 750,\n  \"paymentMethod\": \"cash_on_delivery\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:5000/api/payment/process",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "5000",
+                            "path": ["api", "payment", "process"]
+                        }
+                    }
+                },
+                {
+                    "name": "Payment - Validation Error (No Amount)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 400', function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "});",
+                                    "pm.test('Returns amount required error', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    pm.expect(json.success).to.eql(false);",
+                                    "    pm.expect(json.message).to.eql('Amount is required');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"paymentMethod\": \"credit_card\"\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:5000/api/payment/process",
+                            "protocol": "http",
+                            "host": ["localhost"],
+                            "port": "5000",
+                            "path": ["api", "payment", "process"]
+                        }
+                    }
+                },
+                {
+                    "name": "Payment - Unauthorized (No Token)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 401', function () {",
+                                    "    pm.response.to.have.status(401);",
+                                    "});",
+                                    "pm.test('Returns authorization denied', function () {",
+                                    "    var json = pm.response.json();",
+                                    "    pm.expect(json.message).to.eql('No token, authorization denied');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "request": {
                         "method": "POST",
                         "header": [
@@ -116,24 +786,24 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"amount\": 500\n}"
+                            "raw": "{\n  \"amount\": 500,\n  \"paymentMethod\": \"credit_card\"\n}"
                         },
                         "url": {
                             "raw": "http://localhost:5000/api/payment/process",
                             "protocol": "http",
-                            "host": [
-                                "localhost"
-                            ],
+                            "host": ["localhost"],
                             "port": "5000",
-                            "path": [
-                                "api",
-                                "payment",
-                                "process"
-                            ]
+                            "path": ["api", "payment", "process"]
                         }
                     }
                 }
             ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "token",
+            "value": ""
         }
     ]
 }

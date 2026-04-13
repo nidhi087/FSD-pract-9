@@ -6,6 +6,7 @@ require('dotenv').config();
 const authRoutes = require('./routes/authRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const productRoutes = require('./routes/productRoutes');
 
 const app = express();
 
@@ -25,6 +26,7 @@ mongoose.connect(MONGO_URI)
 app.use('/api/auth', authRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/products', productRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');

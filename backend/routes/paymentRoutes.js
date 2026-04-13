@@ -4,29 +4,42 @@ const authMiddleware = require('../middleware/authMiddleware');
 
 // Dummy Payment Mockup API
 router.post('/process', authMiddleware, (req, res) => {
-    const { amount, paymentMethod } = req.body;
+    const { amount, paymentMethod = 'credit_card' } = req.body;
 
-    if (!amount || !paymentMethod) {
-        return res.status(400).json({ success: false, message: 'Amount and payment method are required' });
+    if (!amount) {
+        return res.status(400).json({ success: false, message: 'Amount is required' });
     }
 
-    // Simulate payment processing delay
+    if (paymentMethod === 'cash_on_delivery') {
+        // Immediate success for COD
+        return res.status(200).json({
+            success: true,
+            transactionId: `COD${Math.floor(Math.random() * 1000000000)}`,
+            message: 'Order placed with Cash on Delivery successfully',
+            amount,
+            paymentMethod
+        });
+    }
+
+    // Simulate payment processing delay for digital payments (UPI, CC, DC)
     setTimeout(() => {
         // 80% chance of success
         const isSuccess = Math.random() > 0.2;
 
         if (isSuccess) {
-            res.status(200).json({
+            return res.status(200).json({
                 success: true,
                 transactionId: `TXN${Math.floor(Math.random() * 1000000000)}`,
                 message: 'Payment processed successfully',
-                amount
+                amount,
+                paymentMethod
             });
         } else {
-            res.status(400).json({
+            return res.status(200).json({
                 success: false,
                 message: 'Payment failed due to insufficient funds or network error',
-                amount
+                amount,
+                paymentMethod
             });
         }
     }, 1500);

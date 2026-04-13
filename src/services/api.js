@@ -1,6 +1,12 @@
 import axios from 'axios';
 
-const API_URL = 'https://fakestoreapi.com';
+// Get token for authorized API calls
+const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+const API_URL = 'http://localhost:5000/api';
 
 export const getProducts = () => {
     return axios.get(`${API_URL}/products`);
