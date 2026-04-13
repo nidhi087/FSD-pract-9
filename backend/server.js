@@ -35,3 +35,6 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+// Export for Vercel serverless deployment
+module.exports = app;
